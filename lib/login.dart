@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:trago/API/apiservices.dart';
+import 'package:trago/Models/LoginModel.dart';
+import 'package:trago/packages.dart';
 import 'package:trago/signup.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   bool validemail = true;
   bool validpassword = true;
   bool visibletxt = true;
+  bool loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +131,36 @@ class _LoginPageState extends State<LoginPage> {
                         setState(() {
                           validemail = validtext(emailcontroller.text);
                           validpassword = validtext(passwordcontroller.text);
+                          if (validemail && validpassword) {
+                            setState(() {
+                              loading = true;
+                            });
+                            LoginRequestModel loginRequestModel =
+                                new LoginRequestModel(
+                                    email: emailcontroller.text,
+                                    password: passwordcontroller.text);
+                            API api = new API();
+                            api.login(loginRequestModel).then((value) {
+                              if (value!.valid) {
+                                API.token = value.token;
+                                emailcontroller.text = "";
+                                passwordcontroller.text = "";
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => PackagesPage()));
+                              } else {
+                                setState(() {
+                                  loading = false;
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Wrong email or password'),
+                                  ),
+                                );
+                              }
+                            });
+                          }
                         });
                       },
                       child: Container(
@@ -137,13 +171,19 @@ class _LoginPageState extends State<LoginPage> {
                           color: Colors.lightGreen,
                           elevation: 7.0,
                           child: Center(
-                            child: Text(
-                              'Login',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Montserrat'),
-                            ),
+                            child: loading
+                                ? CircularProgressIndicator(
+                                    valueColor:
+                                        new AlwaysStoppedAnimation<Color>(
+                                            Colors.white),
+                                  )
+                                : Text(
+                                    'Login',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Montserrat'),
+                                  ),
                           ),
                         ),
                       )),

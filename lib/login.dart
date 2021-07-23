@@ -143,6 +143,7 @@ class _LoginPageState extends State<LoginPage> {
                             api.login(loginRequestModel).then((value) {
                               if (value!.valid) {
                                 API.token = value.token;
+                                API.username = value.username;
                                 emailcontroller.text = "";
                                 passwordcontroller.text = "";
                                 Navigator.push(

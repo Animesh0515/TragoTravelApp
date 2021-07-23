@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_khalti/flutter_khalti.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:trago/API/apiservices.dart';
 import 'package:trago/login.dart';
 import 'package:trago/packages.dart';
 import 'package:trago/signup.dart';
@@ -22,6 +23,8 @@ class _FlightBookingState extends State<FlightBooking> {
   String gender = "Gender";
   String nationality = "Nationality";
   TextEditingController _datecontroller = new TextEditingController();
+  API api = new API();
+  List<dynamic> lst = [];
   var flight = [
     {"FlightNo": 1, "AirlineName": "Nepal Airlines", "Price": 3000}
   ];
@@ -39,6 +42,16 @@ class _FlightBookingState extends State<FlightBooking> {
         _datecontroller.text = new DateFormat("yyyy-MM-dd").format(date);
       });
     }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    api.getFlightDetails().then((value) {
+      lst = value!;
+      print(lst);
+    });
   }
 
   @override
@@ -207,7 +220,7 @@ class _FlightBookingState extends State<FlightBooking> {
                                         decoration: BoxDecoration(
                                           image: DecorationImage(
                                               image: AssetImage(
-                                                  'assets/nepalairllines.jpg'),
+                                                  'assets/airlines/nepalairllines.jpg'),
                                               fit: BoxFit.fill),
                                         ),
                                       ),

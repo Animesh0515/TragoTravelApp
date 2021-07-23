@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:trago/API/apiservices.dart';
 import 'package:trago/Profile.dart';
 import 'package:trago/packageDetails.dart';
 import 'package:trago/signup.dart';
 
 import 'FlightBooking.dart';
+import 'Models/PackageModel.dart';
 
 class PackagesPage extends StatefulWidget {
   const PackagesPage({Key? key}) : super(key: key);
@@ -18,13 +20,23 @@ class PackagesPage extends StatefulWidget {
 class _PackagesPageState extends State<PackagesPage> {
   String address = "";
   int selectedIndex = 0;
+  List<dynamic> package = [];
+  API api = new API();
+  bool searchDestination = false;
+  TextEditingController searchController = new TextEditingController();
 
   @override
   void initState() {
     var location;
     // TODO: implement initState
     super.initState();
-    _determinePosition();
+    api.getPackages().then((value) {
+      setState(() {
+        package = value!;
+      });
+    });
+    // _determinePosition();
+
     //print(location);
   }
 
@@ -56,6 +68,7 @@ class _PackagesPageState extends State<PackagesPage> {
               height: 35,
               width: 245,
               child: TextField(
+                controller: searchController,
                 decoration: InputDecoration(
                   hintStyle: TextStyle(fontSize: 15, color: Colors.black),
                   contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -73,7 +86,12 @@ class _PackagesPageState extends State<PackagesPage> {
                   ),
                 ),
                 textInputAction: TextInputAction.search,
-                //onSubmitted: (val) => searchItem(val),
+                onSubmitted: (val) => api.searchPackage(val).then((value) {
+                  setState(() {
+                    package = value!;
+                    searchDestination = true;
+                  });
+                }),
               ),
 
               //     child: Text(
@@ -202,7 +220,28 @@ class _PackagesPageState extends State<PackagesPage> {
                         "Destinations",
                         style: TextStyle(
                             fontSize: 22.0, fontWeight: FontWeight.bold),
-                      )
+                      ),
+                      SizedBox(
+                        width: 170,
+                      ),
+                      searchDestination
+                          ? GestureDetector(
+                              onTap: () {
+                                api.getPackages().then((value) {
+                                  setState(() {
+                                    package = value!;
+                                    searchDestination = false;
+                                    searchController.text = "";
+                                  });
+                                });
+                              },
+                              child: Text(
+                                "Show all",
+                                style: TextStyle(
+                                    color: Colors.greenAccent, fontSize: 15),
+                              ),
+                            )
+                          : Text(""),
                     ],
                   ),
                 ),
@@ -214,7 +253,7 @@ class _PackagesPageState extends State<PackagesPage> {
                     physics:
                         NeverScrollableScrollPhysics(), // <-- this will disable scroll
                     shrinkWrap: true,
-                    itemCount: 5,
+                    itemCount: package.length,
                     itemBuilder: (BuildContext context, int index) {
                       return GestureDetector(
                         onTap: () {
@@ -222,7 +261,7 @@ class _PackagesPageState extends State<PackagesPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    PackageDetails(index: index),
+                                    PackageDetails(package: package[index]),
                               ));
                         },
                         child: Container(
@@ -252,7 +291,7 @@ class _PackagesPageState extends State<PackagesPage> {
                                             decoration: BoxDecoration(
                                               image: DecorationImage(
                                                   image: AssetImage(
-                                                      'assets/pokhara.jpg'),
+                                                      package[index]["Image"]),
                                                   fit: BoxFit.fill),
                                             ),
                                           ),
@@ -269,7 +308,7 @@ class _PackagesPageState extends State<PackagesPage> {
                                                   height: 5.0,
                                                 ),
                                                 Text(
-                                                  "Pokhara",
+                                                  package[index]["Destination"],
                                                   style: TextStyle(
                                                     fontSize: 30,
                                                     fontWeight: FontWeight.bold,
@@ -279,12 +318,15 @@ class _PackagesPageState extends State<PackagesPage> {
                                                   height: 5,
                                                 ),
 
-                                                Text(
-                                                    "Duration: 2 days 1 night"),
+                                                Text("Duration:" +
+                                                    package[index]["Duration"]),
 
-                                                Text("Type: Couple Package"),
-                                                Text(
-                                                    "Also includes flight and hotel"),
+                                                Text("Type:" +
+                                                    package[index]["Type"]),
+
+                                                deals(package[index]["Flight"],
+                                                    package[index]["Hotel"]),
+
                                                 SizedBox(
                                                   height: 15,
                                                 ),
@@ -297,7 +339,7 @@ class _PackagesPageState extends State<PackagesPage> {
                                                           padding:
                                                               const EdgeInsets
                                                                       .only(
-                                                                  left: 5.0),
+                                                                  left: 4.0),
                                                           child: Icon(
                                                             FontAwesomeIcons
                                                                 .users,
@@ -309,16 +351,20 @@ class _PackagesPageState extends State<PackagesPage> {
                                                         ),
                                                         // SizedBox(width: 20),
                                                         Text(
-                                                          "2",
+                                                          package[index]
+                                                              ["MaxPerson"],
                                                           // style: TextStyle(
                                                           //   fontSize: 20,
                                                           // ),
                                                         ),
                                                         SizedBox(
-                                                          width: 35,
+                                                          width: 22,
                                                         ),
                                                         Text(
-                                                          "Rs. 1000",
+                                                          "Rs." +
+                                                              package[index]
+                                                                      ["Price"]
+                                                                  .toString(),
                                                           style: TextStyle(
                                                             color: Colors.red,
                                                             fontSize: 20,
@@ -453,5 +499,17 @@ class _PackagesPageState extends State<PackagesPage> {
         ),
       ),
     );
+  }
+
+  Widget deals(bool flight, bool hotel) {
+    if (flight && hotel) {
+      return Text("Also includes flight and hotel");
+    } else if (flight) {
+      return Text("Also includes flight");
+    } else if (hotel) {
+      return Text("Also includes hotel");
+    } else {
+      return Text("");
+    }
   }
 }

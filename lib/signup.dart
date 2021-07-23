@@ -19,6 +19,7 @@ class _SignupPageState extends State<SignupPage> {
   bool validName = true;
   late String emailtext;
   bool visibletxt = true;
+  late String passwordtext;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +64,7 @@ class _SignupPageState extends State<SignupPage> {
                         fontFamily: 'Montserrat',
                         fontWeight: FontWeight.bold,
                         color: Colors.grey),
-                    errorText: validEmail ? null : "Please Enter your email",
+                    errorText: validEmail ? null : emailtext,
                     focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.green))),
               ),
@@ -76,8 +77,7 @@ class _SignupPageState extends State<SignupPage> {
                         fontFamily: 'Montserrat',
                         fontWeight: FontWeight.bold,
                         color: Colors.grey),
-                    errorText:
-                        validPassword ? null : "Please enter your password",
+                    errorText: validPassword ? null : passwordtext,
                     focusedBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.green)),
                     suffixIcon: IconButton(
@@ -108,7 +108,7 @@ class _SignupPageState extends State<SignupPage> {
               GestureDetector(
                   onTap: () {
                     validEmail = validateEmail(emailcontroller.text);
-                    validPassword = validtext(passwordcontroller.text);
+                    validPassword = validatePassword(passwordcontroller.text);
                     validName = validtext(namecontroller.text);
                     if (validEmail && validPassword && validName) {
                       SingupRequestModel requestModel = new SingupRequestModel(
@@ -211,6 +211,26 @@ class _SignupPageState extends State<SignupPage> {
       } else {
         setState(() {
           emailtext = "Incorrect Email format!";
+        });
+        return false;
+      }
+    }
+  }
+
+  bool validatePassword(String userInput) {
+    String pattern = r'^([\w]).{6,}$';
+    RegExp regExp = new RegExp(pattern);
+    if (userInput.isEmpty) {
+      setState(() {
+        passwordtext = "Please Enter the password!";
+      });
+      return false;
+    } else {
+      if (regExp.hasMatch(userInput)) {
+        return true;
+      } else {
+        setState(() {
+          passwordtext = "Password must be 7 character long!";
         });
         return false;
       }

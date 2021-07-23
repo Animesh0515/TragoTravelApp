@@ -16,10 +16,15 @@ class LoginRequestModel {
 class LoginResponseModel {
   final bool valid;
   final String token;
+  final String username;
 
-  LoginResponseModel({required this.valid, required this.token});
+  LoginResponseModel(
+      {required this.valid, required this.token, required this.username});
 
   factory LoginResponseModel.fromJson(Map<String, dynamic> result) {
-    return LoginResponseModel(valid: result["valid"], token: result["token"]);
+    return LoginResponseModel(
+        valid: result["valid"],
+        token: result["token"],
+        username: result["username"].toString());
   }
 }

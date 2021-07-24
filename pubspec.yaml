@@ -40,6 +40,7 @@ dependencies:
   flutter_arc_text: ^0.5.0
   image_picker: ^0.8.2
   flutter_image_utilities: ^2.0.1
+  
 
 
 dev_dependencies:
@@ -62,6 +63,7 @@ flutter:
     - assets/
     - assets/package/
     - assets/DP/
+    - assets/airlines/
 
     # - images/a_dot_ham.jpeg
 

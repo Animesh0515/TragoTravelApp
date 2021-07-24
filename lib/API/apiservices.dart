@@ -15,7 +15,7 @@ class API {
   Future<LoginResponseModel?> login(LoginRequestModel loginRequestModel) async {
     try {
       final response = await https.post(
-          Uri.parse("https://b4a7e8cf7d43.ngrok.io/api/Account/Login"),
+          Uri.parse("https://7e45b1ced1a8.ngrok.io/api/Account/Login"),
           body: loginRequestModel.toJson());
 
       if (response.statusCode == 200) {
@@ -34,7 +34,7 @@ class API {
       SingupRequestModel singupRequestModel) async {
     try {
       final response = await https.post(
-          Uri.parse("https://b4a7e8cf7d43.ngrok.io/api/Account/Signup"),
+          Uri.parse("https://7e45b1ced1a8.ngrok.io/api/Account/Signup"),
           body: singupRequestModel.toJson());
 
       if (response.statusCode == 200) {
@@ -52,7 +52,7 @@ class API {
     String authorization = token + ":" + username;
     try {
       final response = await https.get(
-          Uri.parse("https://b4a7e8cf7d43.ngrok.io/api/Package/GetPackage"),
+          Uri.parse("https://7e45b1ced1a8.ngrok.io/api/Package/GetPackage"),
           headers: {
             HttpHeaders.authorizationHeader: "Bearer " + authorization,
             HttpHeaders.contentTypeHeader: "application/json"
@@ -70,7 +70,7 @@ class API {
     String authorization = token + ":" + username;
     try {
       final response = await https.post(
-          Uri.parse("https://b4a7e8cf7d43.ngrok.io/api/Package/SearchPackage"),
+          Uri.parse("https://7e45b1ced1a8.ngrok.io/api/Package/SearchPackage"),
           headers: {
             HttpHeaders.authorizationHeader: "Bearer " + authorization,
             HttpHeaders.contentTypeHeader: "application/json"
@@ -89,7 +89,7 @@ class API {
     String authorization = token + ":" + username;
     try {
       final response = await https.get(
-        Uri.parse("https://b4a7e8cf7d43.ngrok.io/api/Profile/getProfile"),
+        Uri.parse("https://7e45b1ced1a8.ngrok.io/api/Profile/getProfile"),
         headers: {
           HttpHeaders.authorizationHeader: "Bearer " + authorization,
           HttpHeaders.contentTypeHeader: "application/json"
@@ -108,7 +108,7 @@ class API {
     String authorization = token + ":" + username;
     try {
       final response = await https.post(
-          Uri.parse("https://b4a7e8cf7d43.ngrok.io/api/Package/bookPackage"),
+          Uri.parse("https://7e45b1ced1a8.ngrok.io/api/Package/bookPackage"),
           headers: {
             HttpHeaders.authorizationHeader: "Bearer " + authorization,
             HttpHeaders.contentTypeHeader: "application/json"
@@ -128,7 +128,7 @@ class API {
     String authorization = token + ":" + username;
     try {
       final response = await https.post(
-          Uri.parse("https://b4a7e8cf7d43.ngrok.io/api/Profile/updateProfile"),
+          Uri.parse("https://7e45b1ced1a8.ngrok.io/api/Profile/updateProfile"),
           headers: {
             HttpHeaders.authorizationHeader: "Bearer " + authorization,
             HttpHeaders.contentTypeHeader: "application/json"
@@ -144,16 +144,36 @@ class API {
     return null;
   }
 
-  Future<List<dynamic>?> getFlightDetails() async {
+  Future<List<dynamic>?> getFlightDetails(SearchFlightData data) async {
     String authorization = token + ":" + username;
     try {
-      final response = await https.get(
+      final response = await https.post(
           Uri.parse(
-              "https://b4a7e8cf7d43.ngrok.io/api/Flight/getFlightDetails"),
+              "https://7e45b1ced1a8.ngrok.io/api/Flight/getFlightDetails"),
           headers: {
             HttpHeaders.authorizationHeader: "Bearer " + authorization,
             HttpHeaders.contentTypeHeader: "application/json"
-          });
+          },
+          body: json.encode(data));
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      }
+    } catch (e) {
+      print(e);
+    }
+    return null;
+  }
+
+  Future<bool?> bookFlight(FlightBookingRequestModel requestModel) async {
+    String authorization = token + ":" + username;
+    try {
+      final response = await https.post(
+          Uri.parse("https://7e45b1ced1a8.ngrok.io/api/Flight/BookFlight"),
+          headers: {
+            HttpHeaders.authorizationHeader: "Bearer " + authorization,
+            HttpHeaders.contentTypeHeader: "application/json"
+          },
+          body: json.encode(requestModel));
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }

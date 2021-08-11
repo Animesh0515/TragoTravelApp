@@ -6,7 +6,10 @@
         android:label="trago"
          tools:replace="android:label"
         android:icon="@mipmap/ic_launcher" 
-        >
+        
+   >
+    <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyDGloWhXbirevLI7-Q8FhJCxMgpRKw6XGM"/>
 
         <activity
             android:name=".MainActivity"

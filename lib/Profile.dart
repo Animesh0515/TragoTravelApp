@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:trago/API/apiservices.dart';
+import 'package:trago/Map.dart';
 import 'package:trago/packages.dart';
 import 'package:trago/signup.dart';
 
@@ -168,17 +169,19 @@ class _ProfilePageState extends State<ProfilePage> {
                           if (edit)
                             OutlinedButton(
                                 onPressed: () {
-                                  api.getUserData().then((value) {
-                                    setState(() {
-                                      nameController.text = value!.name;
-                                      emailController.text = value.email;
-                                      password = value.password;
-                                      image = value.image;
-                                      loading = false;
-                                    });
-                                  });
+                                  // api.getUserData().then((value) {
+                                  //   setState(() {
+                                  //     nameController.text = value!.name;
+                                  //     emailController.text = value.email;
+                                  //     password = value.password;
+                                  //     image = value.image;
+                                  //     loading = false;
+                                  //   });
+                                  // });
                                   setState(() {
                                     edit = false;
+                                    oldpasswordController.text = "";
+                                    newpasswordController.text = "";
                                   });
                                 },
                                 child: Text(
@@ -205,10 +208,52 @@ class _ProfilePageState extends State<ProfilePage> {
                                     if (validName && validEmail) {
                                       if (oldpasswordController.text != "" ||
                                           newpasswordController.text != "") {
-                                        validOldps = validtext(
-                                            oldpasswordController.text);
+                                        validOldps = validatePassword(
+                                            oldpasswordController.text, 0);
                                         validNewps = validatePassword(
                                             newpasswordController.text, 1);
+
+                                        if (validOldps && validNewps) {
+                                          UserUpdateRequest request =
+                                              new UserUpdateRequest(
+                                                  name: nameController.text,
+                                                  email: emailController.text,
+                                                  oldpasssword:
+                                                      oldpasswordController
+                                                          .text,
+                                                  newpassword:
+                                                      newpasswordController
+                                                          .text);
+
+                                          api
+                                              .updateProfile(request)
+                                              .then((value) {
+                                            if (value == 0) {
+                                              setState(() {
+                                                oldPasswordtext =
+                                                    "Wrong Password";
+                                                validOldps = false;
+                                              });
+                                            } else if (value == 1) {
+                                              setState(() {
+                                                edit = false;
+                                                oldpasswordController.text = "";
+                                                newpasswordController.text = "";
+                                              });
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(const SnackBar(
+                                                content: Text(
+                                                    'User updated successfully'),
+                                              ));
+                                            } else {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(const SnackBar(
+                                                content: Text(
+                                                    'Something went wrong!'),
+                                              ));
+                                            }
+                                          });
+                                        }
                                       }
                                     }
                                   },
@@ -264,7 +309,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 MaterialPageRoute(builder: (context) => PackagesPage()));
           } else if (index == 1) {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => SignupPage()));
+                context, MaterialPageRoute(builder: (context) => Map()));
           } else {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => ProfilePage()));
@@ -353,49 +398,34 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void takePhoto(ImageSource imageSource) async {
-    //final pickedFile = await imagePicker.getImage(source: imageSource);
-    // ignore: deprecated_member_use
     final XFile? pickedImage = await _picker.pickImage(source: imageSource);
-    // final File image = (awai t ImagePicker.pickImage(source: imageSource)) as File;
-
-    File imgFile = File(pickedImage!.path);
-    print(imgFile);
-
-    // final String path = "F:/Punar/trago/assets/DP";
-    // imgFile = await imgFile.copy('$path/' + 'abc.jpg');
-
-    final imageProperties =
-        await FlutterImageUtilities.getImageProperties(imgFile);
-    final jpegFile = await FlutterImageUtilities.saveAsJpeg(
-        sourceFile: File(imgFile.path),
-        destinationFilePath: "F:/Punar/trago/assets/DP/file1.jpg",
-        quality: 60,
-        maxWidth: 1920,
-        maxHeight: 1080,
-        canScaleUp: false);
-    // final File newImage =    await imgFile.copy('F:/Punar/trago/assets/DP/filename.jpg');
-    //  var fileName = basename(file.path);
-
-    // final Directory path = await getApplicationDocumentsDirectory();
-    // print(path);
-
-    // if (image != null) {
-    //   String imageData = base64Encode(image.readAsBytesSync());
-    //   print(imageData);
-    //   Gallery.image = imageData;
-    //   apiService.updatedProfileImage(imageData).then((value) {
-    //     setState(() {
-    //       if (!value) {
-    //         imagecontroller.text = null;
-    //         final snackBar = SnackBar(content: Text("Error saving image!"));
-    //         // ignore: deprecated_member_use
-    //         Scaffold.of(context).showSnackBar(snackBar);
-    //       } else {
-    //         imagecontroller.text = imageData;
-    //       }
-    //     });
-    //   });
-    // }
+    setState(() {
+      nameController.text = "";
+      emailController.text = "";
+      password = "";
+      image = "";
+      loading = true;
+    });
+    api.upload(pickedImage!).then((value) {
+      if (value) {
+        api.getUserData().then((value) {
+          setState(() {
+            nameController.text = value!.name;
+            emailController.text = value.email;
+            password = value.password;
+            image = value.image;
+            loading = false;
+          });
+        });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Profile Pciture Updated'),
+        ));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Something went wrong!'),
+        ));
+      }
+    });
   }
 
   bool validtext(String userInput) {
@@ -435,7 +465,7 @@ class _ProfilePageState extends State<ProfilePage> {
         if (numbering == 0) {
           oldPasswordtext = "Please Enter the old password";
         } else {
-          passwordtext = "Please Enter the password!";
+          passwordtext = "Please Enter the new password!";
         }
       });
       return false;

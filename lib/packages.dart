@@ -3,6 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:trago/API/apiservices.dart';
+import 'package:trago/Hotel.dart';
+import 'package:trago/Map.dart';
 import 'package:trago/Profile.dart';
 import 'package:trago/packageDetails.dart';
 import 'package:trago/signup.dart';
@@ -189,7 +191,13 @@ class _PackagesPageState extends State<PackagesPage> {
                     //   color: Colors.grey[200],
                     //   borderRadius: BorderRadius.circular(10.0),
                     // ),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Hotel(),
+                          ));
+                    },
                     // child: Padding(
                     //   padding: const EdgeInsets.all(8.0),
                     child: Icon(
@@ -470,7 +478,7 @@ class _PackagesPageState extends State<PackagesPage> {
                 MaterialPageRoute(builder: (context) => PackagesPage()));
           } else if (index == 1) {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => SignupPage()));
+                context, MaterialPageRoute(builder: (context) => Map()));
           } else {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => ProfilePage()));
